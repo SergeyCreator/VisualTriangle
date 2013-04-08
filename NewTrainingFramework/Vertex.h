@@ -4,6 +4,6 @@
 struct Vertex 
 {
 	Vector3 pos;
-	float color[3];
+	Vector3 color;
 
 };

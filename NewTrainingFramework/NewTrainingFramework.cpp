@@ -2,11 +2,14 @@
 //
 
 #include "stdafx.h"
+#include <iostream>
+using namespace std;
 #include "../Utilities/utilities.h" 
 #include "Vertex.h"
 #include "Shaders.h"
 #include "Globals.h"
 #include <conio.h>
+#include <windows.h>
 
 
 GLuint vboId;
@@ -14,8 +17,8 @@ Shaders myShaders;
 
 float i=0.0;
 Vertex verticesData[3];
-Vector4  rez, myVector1, myVector2;
-Matrix myMatr;
+Vector4  rez, myVector1, myVector2, myVector, m1,m2,m3;
+Matrix myMatr, myMatr2;
 char* pointer = 0;
 int Init ( ESContext *esContext )
 {
@@ -26,10 +29,9 @@ int Init ( ESContext *esContext )
 	verticesData[0].pos.x =  0.0f;  verticesData[0].pos.y =  0.5f;  verticesData[0].pos.z =  0.0f;
 	verticesData[1].pos.x = -0.5f;  verticesData[1].pos.y = -0.5f;  verticesData[1].pos.z =  0.0f;
 	verticesData[2].pos.x =  0.5f;  verticesData[2].pos.y = -0.5f;  verticesData[2].pos.z =  0.0f;
-	verticesData[0].color[0] =  0.0f;  verticesData[0].color[1] =  0.0f; verticesData[0].color[2] =  0.0f; 
-	verticesData[1].color[0] =  0.0f;  verticesData[1].color[1] =  0.0f;  verticesData[1].color[2] =  0.0f;  
-	verticesData[2].color[0] =  0.0f; verticesData[2].color[1] =  0.0f; verticesData[2].color[2] =  0.0f; 
-	
+	verticesData[0].color.x =1.0f;  verticesData[0].color.y =  0.0f; verticesData[0].color.z =  0.0f; 
+	verticesData[1].color.x =  0.0f;  verticesData[1].color.y =  1.0f;  verticesData[1].color.z =  0.0f;  
+	verticesData[2].color.x =  0.0f; verticesData[2].color.y =  0.0f; verticesData[2].color.z =  1.0f;
 	
 	
 
@@ -49,7 +51,7 @@ int Init ( ESContext *esContext )
 
 void Draw ( ESContext *esContext )
 {
-
+	int co=0;
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 
@@ -65,10 +67,11 @@ void Draw ( ESContext *esContext )
 
 		glVertexAttribPointer(myShaders.positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	
-		
+		char * i=0;
+
 		glEnableVertexAttribArray(myShaders.colorAttribute);
 
-		glVertexAttribPointer(myShaders.colorAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+		glVertexAttribPointer(myShaders.colorAttribute, 3, GL_FLOAT, GL_FALSE,sizeof(Vertex),i+sizeof(Vector3) );
 
 		
 	}
@@ -84,7 +87,6 @@ void Draw ( ESContext *esContext )
 
 void Update ( ESContext *esContext, float deltaTime )
 {
-	
 	myVector1.x=verticesData[1].pos.x;  //Change position of Vertices
 	myVector1.y=verticesData[1].pos.y;
 	myVector1.z=verticesData[1].pos.z;
@@ -93,6 +95,7 @@ void Update ( ESContext *esContext, float deltaTime )
 	verticesData[1].pos.y=rez.y;
 	verticesData[1].pos.z=rez.z;
 
+	
 	myVector2.x=verticesData[2].pos.x;
 	myVector2.y=verticesData[2].pos.y;
 	myVector2.z=verticesData[2].pos.z;
@@ -101,12 +104,15 @@ void Update ( ESContext *esContext, float deltaTime )
 	verticesData[2].pos.y=rez.y;
 	verticesData[2].pos.z=rez.z;
 	
+	
 	//buffer object
 	glGenBuffers(1, &vboId); //buffer object name generation
 	glBindBuffer(GL_ARRAY_BUFFER, vboId); //buffer object binding
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData), verticesData, GL_STATIC_DRAW); //creation and initializion of buffer onject storage
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	
+
 }
 
 void Key ( ESContext *esContext, unsigned char key, bool bIsPressed)
