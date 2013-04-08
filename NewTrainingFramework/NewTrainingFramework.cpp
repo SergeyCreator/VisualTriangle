@@ -71,7 +71,7 @@ void Draw ( ESContext *esContext )
 
 		glEnableVertexAttribArray(myShaders.colorAttribute);
 
-		glVertexAttribPointer(myShaders.colorAttribute, 3, GL_FLOAT, GL_FALSE,sizeof(Vertex),i+sizeof(Vector3) );
+		glVertexAttribPointer(myShaders.colorAttribute, 3, GL_FLOAT, GL_FALSE,sizeof(Vertex),i+sizeof(Vector3) ); // changes for colorAttribute
 
 		
 	}
