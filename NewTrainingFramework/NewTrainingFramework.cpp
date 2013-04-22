@@ -12,14 +12,14 @@ using namespace std;
 #include <windows.h>
 
 
-GLuint vboId;
+GLuint vboId, textureId;
 Shaders myShaders;
-
 float i=0.0;
 Vertex verticesData[3];
 Vector4  rez, myVector1, myVector2, myVector, m1,m2,m3;
-Matrix myMatr, myMatr2;
+Matrix myMatr2;
 char* pointer = 0;
+float angle;
 int Init ( ESContext *esContext )
 {
 	glClearColor ( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -33,16 +33,29 @@ int Init ( ESContext *esContext )
 	verticesData[1].color.x =  0.0f;  verticesData[1].color.y =  1.0f;  verticesData[1].color.z =  0.0f;  
 	verticesData[2].color.x =  0.0f; verticesData[2].color.y =  0.0f; verticesData[2].color.z =  1.0f;
 	
-	
-
-
 	glGenBuffers(1, &vboId); //buffer object name generation
 	glBindBuffer(GL_ARRAY_BUFFER, vboId); //buffer object binding
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData), verticesData, GL_STATIC_DRAW); //creation and initializion of buffer onject storage
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 	
-	
+	glGenTextures(1,&textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	int width,height,bpp;
+	char* bufferTGA = LoadTGA("../Resources/Textures/Rock.tga",&width,&height,&bpp);
+	if(bpp==24){
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,bufferTGA);
+	}
+	else {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,bufferTGA);
+	}
+	delete[] bufferTGA;
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	//creation of shaders and program 
 	return myShaders.Init("../Resources/Shaders/TriangleShaderVS.vs", "../Resources/Shaders/TriangleShaderFS.fs");
 
@@ -51,30 +64,48 @@ int Init ( ESContext *esContext )
 
 void Draw ( ESContext *esContext )
 {
-	int co=0;
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 
+	unsigned short textureUnit = 0;
+	
+	textureUnit++;
+
 	glUseProgram(myShaders.program);
+	
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vboId);
 	
 
-
+	
 	if(myShaders.positionAttribute != -1) //attribute passing to shader, for uniforms use glUniform1f(time, deltaT); glUniformMatrix4fv( m_pShader->matrixWVP, 1, false, (GLfloat *)&rotationMat );
 	{
+
+
+	
+
+
+
 		glEnableVertexAttribArray(myShaders.positionAttribute);
+		glEnableVertexAttribArray(myShaders.texCoordLoc);
 
 		glVertexAttribPointer(myShaders.positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	
+		glVertexAttribPointer(myShaders.texCoordLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
 		char * i=0;
 
 		glEnableVertexAttribArray(myShaders.colorAttribute);
 
 		glVertexAttribPointer(myShaders.colorAttribute, 3, GL_FLOAT, GL_FALSE,sizeof(Vertex),i+sizeof(Vector3) ); // changes for colorAttribute
 
+
+
 		
 	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glUniform1i(myShaders.samplerLoc, 0);
 
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -87,31 +118,14 @@ void Draw ( ESContext *esContext )
 
 void Update ( ESContext *esContext, float deltaTime )
 {
-	myVector1.x=verticesData[1].pos.x;  //Change position of Vertices
-	myVector1.y=verticesData[1].pos.y;
-	myVector1.z=verticesData[1].pos.z;
-	rez=myMatr.SetRotationY(0.01)*myVector1;
-	verticesData[1].pos.x=rez.x;
-	verticesData[1].pos.y=rez.y;
-	verticesData[1].pos.z=rez.z;
+	Matrix myMatr;
+	angle+=deltaTime;
+	myMatr.SetRotationY(angle);
+	glUniformMatrix4fv (myShaders.matrRot, 1, GL_FALSE, (GLfloat*) &myMatr );
+	
+	if(GetAsyncKeyState(VK_DOWN)){
 
-	
-	myVector2.x=verticesData[2].pos.x;
-	myVector2.y=verticesData[2].pos.y;
-	myVector2.z=verticesData[2].pos.z;
-	rez=myMatr.SetRotationY(0.01)*myVector2;
-	verticesData[2].pos.x=rez.x;
-	verticesData[2].pos.y=rez.y;
-	verticesData[2].pos.z=rez.z;
-	
-	
-	//buffer object
-	glGenBuffers(1, &vboId); //buffer object name generation
-	glBindBuffer(GL_ARRAY_BUFFER, vboId); //buffer object binding
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData), verticesData, GL_STATIC_DRAW); //creation and initializion of buffer onject storage
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	
+	}
 
 }
 
